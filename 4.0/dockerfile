@@ -1,0 +1,26 @@
+FROM centos
+
+RUN echo "[mongodb-org-4.0]" > /etc/yum.repos.d/mongodb-org-4.0.repo
+RUN echo "name=MongoDB Repository" >> /etc/yum.repos.d/mongodb-org-4.0.repo
+RUN echo "baseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/4.0/x86_64/" >> /etc/yum.repos.d/mongodb-org-4.0.repo
+RUN echo "gpgcheck=1" >> /etc/yum.repos.d/mongodb-org-4.0.repo
+RUN echo "enabled=1" >> /etc/yum.repos.d/mongodb-org-4.0.repo
+RUN echo "gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc" >> /etc/yum.repos.d/mongodb-org-4.0.repo
+RUN mkdir /data/db -p
+RUN mkdir /logs
+RUN yum -y install mongodb-org
+RUN sed -i -e s+/var/lib/mongo+/data+g /etc/mongod.conf
+RUN sed -i -e s+/var/log/mongodb/mongod.log+/logs+g /etc/mongod.conf
+RUN systemctl enable mongod
+RUN exclude=mongodb-org,mongodb-org-server,mongodb-org-shell,mongodb-org-mongos,mongodb-org-tools
+RUN yum -y update
+CMD mongod --bind_ip 0.0.0.0 -vv
+
+LABEL maintainer="Alvaro Delgado"
+
+EXPOSE 27017/tcp
+EXPOSE 27018/tcp
+EXPOSE 27019/tcp
+
+VOLUME /data/db/
+VOLUME /logs/
